@@ -1,0 +1,53 @@
+#+title: Org Babel support for Kubernetes YAML
+#+startup: showeverything
+#+options: todo:t
+
+Apply Kubernetes YAML in Org mode buffers:
+
+**** Example
+
+#+BEGIN_SRC ruby
+,#+BEGIN_SRC yaml :results output
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nats-server
+spec:
+  containers:
+    - name: nats
+      image: nats
+      command:
+        - /gnatsd
+      ports:
+        - containerPort: 4222
+          hostPort: 4222
+          name: client
+,#+END_SRC
+
+,#+RESULTS:
+: pod/nats-server created
+
+,#+BEGIN_SRC sh
+kubectl get pods -o wide
+,#+END_SRC
+
+,#+RESULTS:
+| NAME                   | READY | STATUS  | RESTARTS | AGE   |          IP | NODE     | NOMINATED | NODE |
+| nats-server            | 1/1   | Running |        0 | 33s   | 172.17.0.11 | minikube | <none>    |      |
+#+END_SRC
+
+**** Installation
+
+- Get a YAML mode
+
+- Add YAML as a an executable lang
+
+  #+BEGIN_SRC emacs-lisp
+(org-babel-do-load-languages
+      'org-babel-load-languages
+      '((yaml . t)))
+
+(setq org-babel-k8s-command "kubectl")
+  #+END_SRC
+
+- Put =ob-yaml.el= in this repo within the =contrib/lisp/= folder of your Org mode distribution.
